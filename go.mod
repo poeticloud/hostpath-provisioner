@@ -9,5 +9,3 @@ require (
 	k8s.io/klog/v2 v2.3.0
 	sigs.k8s.io/sig-storage-lib-external-provisioner/v6 v6.0.0
 )
-
-replace sigs.k8s.io/sig-storage-lib-external-provisioner/v6 => ../..
