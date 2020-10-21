@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	provisionerName = "example.com/sharepath"
+	provisionerName = "poeticloud.com/sharepath"
 )
 
 type hostPathProvisioner struct {

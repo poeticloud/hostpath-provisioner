@@ -1,7 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sharepath-provisioner
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sharepath-provisioner
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: sharepath-provisioner
+        version: v1
+    spec:
+      containers:
+        - name: sharepath-provisioner
+          image: poeticloud/sharepath-provisioner:v1.0.2
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: NODE_HOST_PATH
+              value: "/sharepath"
+          volumeMounts:
+            - name: pv-volume
+              mountPath: /sharepath
+      serviceAccountName: sharepath-provisioner
+      volumes:
+        - name: pv-volume
+          hostPath:
+            path: /sharepath
+
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: sharepath-provisioner
+  namespace: kube-system
+
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,7 +65,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: sharepath-provisioner
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: sharepath-provisioner
@@ -38,6 +75,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: leader-locking-sharepath-provisioner
+  namespace: kube-system
 rules:
   - apiGroups: [""]
     resources: ["endpoints"]
@@ -50,10 +88,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: leader-locking-sharepath-provisioner
+  namespace: kube-system
 subjects:
   - kind: ServiceAccount
     name: sharepath-provisioner
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: Role
   name: leader-locking-sharepath-provisioner
