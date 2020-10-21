@@ -1,11 +1,11 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: hostpath-provisioner
+  name: sharepath-provisioner
 spec:
   containers:
-    - name: hostpath-provisioner
-      image: poeticloud/hostpath-provisioner:v1.0.1
+    - name: sharepath-provisioner
+      image: poeticloud/sharepath-provisioner:v1.0.0
       imagePullPolicy: "IfNotPresent"
       env:
         - name: NODE_NAME
@@ -14,9 +14,9 @@ spec:
               fieldPath: spec.nodeName
       volumeMounts:
         - name: pv-volume
-          mountPath: /tmp/hostpath-provisioner
-  serviceAccountName: hostpath-provisioner
+          mountPath: /tmp/sharepath-provisioner
+  serviceAccountName: sharepath-provisioner
   volumes:
     - name: pv-volume
       hostPath:
-        path: /tmp/hostpath-provisioner
+        path: /tmp/sharepath-provisioner

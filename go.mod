@@ -1,4 +1,4 @@
-module sigs.k8s.io/kubernetes-sigs/sig-storage-lib-external-provisioner/examples/hostpath-provisioner
+module sigs.k8s.io/kubernetes-sigs/sig-storage-lib-external-provisioner/examples/sharepath-provisioner
 
 go 1.13
 

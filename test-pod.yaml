@@ -12,10 +12,10 @@ spec:
       - "-c"
       - "touch /mnt/SUCCESS && exit 0 || exit 1"
     volumeMounts:
-      - name: hostpath-pvc
+      - name: sharepath-pvc
         mountPath: "/mnt"
   restartPolicy: "Never"
   volumes:
-    - name: hostpath-pvc
+    - name: sharepath-pvc
       persistentVolumeClaim:
-        claimName: hostpath-pvc
+        claimName: sharepath-pvc

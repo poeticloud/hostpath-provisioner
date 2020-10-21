@@ -1,9 +1,9 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: hostpath-pvc
+  name: sharepath-pvc
 spec:
-  storageClassName: "example-hostpath"
+  storageClassName: "example-sharepath"
   accessModes:
     - ReadWriteMany
   resources:
