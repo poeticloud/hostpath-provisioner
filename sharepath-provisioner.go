@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"syscall"
+	"time"
 
 	"sigs.k8s.io/sig-storage-lib-external-provisioner/v6/controller"
 
@@ -40,21 +41,16 @@ const (
 type hostPathProvisioner struct {
 	// The directory to create PV-backing directories in
 	pvDir string
-
-	// Identity of this hostPathProvisioner, set to node's name. Used to identify
-	// "this" provisioner's PVs.
-	identity string
 }
 
 // NewHostPathProvisioner creates a new sharepath provisioner
 func NewHostPathProvisioner() controller.Provisioner {
-	nodeName := os.Getenv("NODE_NAME")
-	if nodeName == "" {
-		klog.Fatal("env variable NODE_NAME must be set so that this provisioner can identify itself")
+	nodeHostPath := os.Getenv("NODE_HOST_PATH")
+	if nodeHostPath == "" {
+		nodeHostPath = "/mnt/sharepath"
 	}
 	return &hostPathProvisioner{
-		pvDir:    "/tmp/sharepath-provisioner",
-		identity: nodeName,
+		pvDir:    nodeHostPath,
 	}
 }
 
@@ -62,7 +58,13 @@ var _ controller.Provisioner = &hostPathProvisioner{}
 
 // Provision creates a storage asset and returns a PV object representing it.
 func (p *hostPathProvisioner) Provision(ctx context.Context, options controller.ProvisionOptions) (*v1.PersistentVolume, controller.ProvisioningState, error) {
-	path := path.Join(p.pvDir, options.PVName)
+	if options.PVC.Spec.Selector != nil {
+		return nil, controller.ProvisioningFinished, errors.New("claim Selector is not supported")
+	}
+
+	pvc := options.PVC
+	pvname := pvc.Namespace + "-" + pvc.Name
+	path := path.Join(p.pvDir, pvname)
 
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return nil, controller.ProvisioningFinished, err
@@ -70,10 +72,7 @@ func (p *hostPathProvisioner) Provision(ctx context.Context, options controller.
 
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: options.PVName,
-			Annotations: map[string]string{
-				"hostPathProvisionerIdentity": p.identity,
-			},
+			Name: pvname,
 		},
 		Spec: v1.PersistentVolumeSpec{
 			PersistentVolumeReclaimPolicy: *options.StorageClass.ReclaimPolicy,
@@ -95,16 +94,17 @@ func (p *hostPathProvisioner) Provision(ctx context.Context, options controller.
 // Delete removes the storage asset that was created by Provision represented
 // by the given PV.
 func (p *hostPathProvisioner) Delete(ctx context.Context, volume *v1.PersistentVolume) error {
-	ann, ok := volume.Annotations["hostPathProvisionerIdentity"]
-	if !ok {
-		return errors.New("identity annotation not found on PV")
-	}
-	if ann != p.identity {
-		return &controller.IgnoredError{Reason: "identity annotation on PV does not match ours"}
+
+	dir := path.Join(p.pvDir, "._archived")
+
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
 	}
 
-	path := path.Join(p.pvDir, volume.Name)
-	if err := os.RemoveAll(path); err != nil {
+	old := path.Join(p.pvDir, volume.Name)
+	new := path.Join(p.pvDir, "._archived", volume.Name + "." + time.Now().UTC().Format(time.RFC3339))
+
+	if err := os.Rename(old, new); err != nil {
 		return err
 	}
 

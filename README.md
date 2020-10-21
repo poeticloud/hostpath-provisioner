@@ -12,6 +12,25 @@ This provisioner is for private kubernetes cluster deploy.
 
 ![](./design/sharepath-deploy.png)
 
+## Test
+
+After create pvc:
+
+```plain
+[root@node-1 ~]# tree -al /sharepath/
+/sharepath/
+└── default-sharepath-pvc
+```
+
+After delete pvc:
+
+```plain
+[root@node-1 ~]# tree -al /sharepath/
+/sharepath/
+├── ._archived
+│   └── default-sharepath-pvc
+```
+
 ## Build & Push Image to Docker Hub
 
 ```shell
