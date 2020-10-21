@@ -22,7 +22,7 @@ docker push $IMAGE
 
 ## FAQ
 
-### If your os is not Linux , you should use docker to build image, insteed of use `make`, use.
+### If your os is not Linux , you should use `docker` insteed of `make` to build
 
 ```shell
 docker run -it --rm -v $(pwd):/build -w /build golang:1.14 make sharepath-provisioner
