@@ -44,3 +44,9 @@ go mod tidy
 go mod vendor
 CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-extldflags "-static"' -o sharepath-provisioner .
 ```
+
+## Thanks
+
+- https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner/tree/master/examples/hostpath-provisioner
+- https://github.com/torchbox/k8s-hostpath-provisioner
+- https://github.com/rimusz/hostpath-provisioner
