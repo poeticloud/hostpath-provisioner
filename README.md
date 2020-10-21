@@ -8,7 +8,7 @@ make
 
 ## Intro
 
-This provisioner is for following private kubernetes cluster deploy.
+This provisioner is for private kubernetes cluster deploy.
 
 ![](./design/sharepath-deploy.png)
 
@@ -20,10 +20,27 @@ make
 docker push $IMAGE
 ```
 
-**IMPORTANT** If your os is not Linux , use docker to run above command.
+## FAQ
+
+### If your os is not Linux , you should use docker to build image, insteed of use `make`, use.
 
 ```shell
 docker run -it --rm -v $(pwd):/build -w /build golang:1.14 make sharepath-provisioner
-export IMAGE={YOUR_USERNAME}/sharepath-provisioner:v1.0.X
-make image
+```
+
+### 如果你在国内，编译 golang 需要设置代理
+
+请在执行编译命令前，执行：
+
+```shell
+go env -w GOPROXY=https://goproxy.cn,direct
+go env -w GOSUMDB="sum.golang.google.cn"
+```
+
+### If you want to use vendor for build
+
+```shell
+go mod tidy
+go mod vendor
+CGO_ENABLED=0 go build -mod=vendor -a -ldflags '-extldflags "-static"' -o sharepath-provisioner .
 ```
