@@ -12,7 +12,45 @@ This provisioner is for private kubernetes cluster deploy.
 
 ![](./design/sharepath-deploy.png)
 
+## Deploy into your kubernetes cluster
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/poeticloud/sharepath-provisioner/main/deploy/sharepath-provisioner.yml
+```
+
+**IMPORTANT** You can change the default directory name ( `/sharepath` ) to anything in above YAML file.
+
 ## Test
+
+Create StorageClass :
+
+```shell
+cat <<EOF | kubectl apply -f -
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: example-sharepath
+provisioner: poeticloud.com/sharepath
+EOF
+```
+
+Create PVC:
+
+```shell
+cat <<EOF | kubectl apply -f -
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sharepath-pvc
+spec:
+  storageClassName: "example-sharepath"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi
+EOF
+```
 
 After create pvc:
 
@@ -20,6 +58,12 @@ After create pvc:
 [root@node-1 ~]# tree -al /sharepath/
 /sharepath/
 └── default-sharepath-pvc
+```
+
+Delete PVC:
+
+```shell
+kubectl delete pvc sharepath-pvc
 ```
 
 After delete pvc:
