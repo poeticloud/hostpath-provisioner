@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: hostpath-provisioner
-      image: hostpath-provisioner:latest
+      image: poeticloud/hostpath-provisioner:v1.0.1
       imagePullPolicy: "IfNotPresent"
       env:
         - name: NODE_NAME
